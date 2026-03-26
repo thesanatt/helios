@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  # ── PostgreSQL ────────────────────────
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: helios
+      POSTGRES_USER: helios
+      POSTGRES_PASSWORD: helios
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  # ── Redis ─────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  # ── Backend API ───────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://helios:helios@db:5432/helios
+      REDIS_URL: redis://redis:6379/0
+      NASA_API_KEY: ${NASA_API_KEY:-DEMO_KEY}
+      CORS_ORIGINS: http://localhost:3000
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  pgdata:
