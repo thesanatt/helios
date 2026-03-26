@@ -32,7 +32,7 @@ class DONKIClient:
     async def _get(self, endpoint: str, params: dict) -> list[dict]:
         """Make authenticated GET request to DONKI with retry."""
         url = f"{self.base_url}/{endpoint}"
-        async with httpx.AsyncClient(timeout=30.0) as client:
+        async with httpx.AsyncClient(timeout=120.0) as client:
             response = await client.get(url, params=params)
             response.raise_for_status()
             data = response.json()

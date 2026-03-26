@@ -28,7 +28,9 @@ async def lifespan(app: FastAPI):
     # start_scheduler()
     logger.info("running_without_database")
 
-    # TODO: Load trained GP models from disk if available
+    # Load trained GP models
+    from app.services.prediction import prediction_service
+    prediction_service.load_model("models/helios_gp_models.pt")
 
     yield
 
