@@ -57,12 +57,7 @@ class PredictionService:
             logger.warning("prediction_service_no_model", path=path)
 
     async def get_current_prediction(self) -> dict:
-        """Generate current prediction from latest DONKI data.
-
-        Uses GP models if trained, otherwise falls back to
-        physics-based heuristic.
-        """
-        # Fetch recent CMEs
+        """Generate current prediction from latest DONKI data."""
         end = datetime.utcnow()
         start = end - timedelta(days=7)
 
@@ -72,18 +67,14 @@ class PredictionService:
         if not cmes:
             return self._quiet_prediction()
 
-        # Extract features from the most recent earth-directed CME
         latest_cme = cmes[-1]
         features = extract_cme_features(latest_cme, flares)
 
         if features is None:
             return self._quiet_prediction()
 
-        # Route to GP model or heuristic
-        if self.model_loaded:
-            return await self._gp_prediction(features, latest_cme, len(cmes))
-        else:
-            return self._heuristic_prediction(features, latest_cme, len(cmes))
+        # Always use heuristic in production for now
+        return self._heuristic_prediction(features, latest_cme, len(cmes))
 
     async def _gp_prediction(self, features, cme, n_active_cmes: int) -> dict:
         """Generate prediction using trained GP models."""
