@@ -28,14 +28,7 @@ async def lifespan(app: FastAPI):
     # start_scheduler()
     logger.info("running_without_database")
 
-    # Load trained GP models if available (skip on low-memory environments)
-    import os
-    if os.path.exists("models/helios_gp_models.pt"):
-        try:
-            from app.services.prediction import prediction_service
-            prediction_service.load_model("models/helios_gp_models.pt")
-        except Exception as e:
-            logger.warning("model_load_failed", error=str(e))
+    logger.info("running_in_lightweight_mode")
 
     yield
 
